@@ -90,7 +90,7 @@ namespace Product_Manager_v2._0
 
                                 ListTasksBySearch();
 
-                                ReadKey(true);
+                                CursorVisible = false;
 
                                 Clear();
 
@@ -98,6 +98,20 @@ namespace Product_Manager_v2._0
                             }
                             else if (subMenuCategoryKeyInput.Key == ConsoleKey.D4)
                             {
+                                Clear();
+
+                                WriteLine("ID  Category                                       Total products");
+
+                                WriteLine("------------------------------------------------------------------");
+
+                                ListTasks();
+
+                                ListTasksBySearchCategory();
+
+                                CursorVisible = false;
+
+                                Clear();
+
                                 // Input Code
                             }
                             else if (subMenuCategoryKeyInput.Key == ConsoleKey.X)
@@ -275,9 +289,123 @@ namespace Product_Manager_v2._0
                 WriteLine(" ");
 
                 WriteLine("------------------------------------------------------------------");
+
+                WriteLine("");
+
+                WriteLine("[A] Add Product [Esc] Return To Submenu");
+            }
+
+            ConsoleKeyInfo options = ReadKey(true);
+
+            if (options.Key == ConsoleKey.A)
+            {
+                SearchByName();
+            }
+            else if (options.Key == ConsoleKey.Escape)
+            {
+                Clear();
             }
         }
 
+        private static void ListTasksBySearchCategory()
+        {
+            var myCategoryList = SearchForTask();
+
+            WriteLine("ID  Category                                       Total products");
+
+            WriteLine("------------------------------------------------------------------");
+
+            foreach (var myCategories in myCategoryList)
+            {
+                WriteLine(" ");
+
+                WriteLine($"ID: {myCategories.id}");
+
+                WriteLine(" ");
+
+                WriteLine($"Category Name: {myCategories.categoryName}");
+
+                WriteLine(" ");
+
+                WriteLine($"Total Products: {myCategories.totalProducts}");
+
+                WriteLine(" ");
+
+                WriteLine("------------------------------------------------------------------");
+
+                WriteLine("");
+
+                WriteLine("[A] Add Product [Esc] Return To Submenu");
+            }
+
+            ConsoleKeyInfo options = ReadKey(true);
+
+            if (options.Key == ConsoleKey.A)
+            {
+                SearchByNameCategory();
+            }
+            else if (options.Key == ConsoleKey.Escape)
+            {
+                Clear();
+            }
+        }
+
+
+        private static void SearchByName()
+        {
+            var searchForProduct = SearchForProduct();
+
+            WriteLine("ID  Category                                       Total products");
+
+            WriteLine("------------------------------------------------------------------");
+
+            foreach (var myProducts in searchForProduct)
+            {
+                WriteLine(" ");
+
+                WriteLine($"ID: {myProducts.id}");
+
+                WriteLine(" ");
+
+                WriteLine($"Product: {myProducts.product}");
+
+                WriteLine(" ");
+
+                WriteLine("------------------------------------------------------------------");
+            }
+
+            var chooseByID = SearchForProductID();
+
+            Clear();
+        }
+
+        private static void SearchByNameCategory()
+        {
+            var searchForProduct = SearchForProduct();
+
+            WriteLine("ID  Category                                       Total products");
+
+            WriteLine("------------------------------------------------------------------");
+
+            foreach (var myProducts in searchForProduct)
+            {
+                WriteLine(" ");
+
+                WriteLine($"ID: {myProducts.id}");
+
+                WriteLine(" ");
+
+                WriteLine($"Product: {myProducts.product}");
+
+                WriteLine(" ");
+
+                WriteLine("------------------------------------------------------------------");
+            }
+
+            var chooseByID = SearchForCategory();
+
+            Clear();
+        }
 
         private static List<Categories> SearchForTask()
         {
@@ -319,6 +447,135 @@ namespace Product_Manager_v2._0
             }
 
             return myCategories;
+        }
+
+        private static List<Product> SearchForProductID()
+        {
+            WriteLine("");
+
+            CursorVisible = true;
+
+            Write("Selected ID> ");
+
+            string searchByID = ReadLine();
+
+            CursorVisible = false;
+
+            Clear();
+
+            string sql = $@"SELECT * FROM ProductToCategory WHERE ID = {searchByID}";
+
+            List<Product> myProducts = new List<Product>();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var id = (int)reader["ID"];
+                    var product = (string)reader["Product"];
+
+                    myProducts.Add(new Product(id, product));
+                }
+
+                connection.Close();
+            }
+
+            WriteLine("Product added to category.");
+
+            Thread.Sleep(2000);
+
+            Clear();
+
+            return myProducts;
+        }
+
+        private static List<Product> SearchForCategory()
+        {
+            WriteLine("");
+
+            CursorVisible = true;
+
+            Write("Selected ID> ");
+
+            string searchByID = ReadLine();
+
+            CursorVisible = false;
+
+            Clear();
+
+            string sql = $@"SELECT * FROM ProductToCategory WHERE ID = {searchByID}";
+
+            List<Product> myProducts = new List<Product>();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var id = (int)reader["ID"];
+                    var product = (string)reader["Product"];
+
+                    myProducts.Add(new Product(id, product));
+                }
+
+                connection.Close();
+            }
+
+            WriteLine("Category added to category.");
+
+            Thread.Sleep(2000);
+
+            Clear();
+
+            return myProducts;
+        }
+
+        private static List<Product> SearchForProduct()
+        {
+            WriteLine("");
+
+            CursorVisible = true;
+
+            Write("Search product: ");
+
+            string searchByName = ReadLine();
+
+            CursorVisible = false;
+
+            Clear();
+
+            var sql = $@"SELECT * FROM ProductToCategory WHERE Product LIKE '%{searchByName}%'";
+
+            List<Product> myProducts = new List<Product>();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                connection.Open();
+
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var id = (int)reader["ID"];
+                    var product = (string)reader["Product"];
+
+                    myProducts.Add(new Product(id, product));
+                }
+
+                connection.Close();
+            }
+
+            return myProducts;
         }
     }
 }
